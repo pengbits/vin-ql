@@ -1,13 +1,13 @@
-# GraphQL TV Explorer - Learning Project
-
-A full-stack GraphQL learning project using React (Apollo Client) and Apollo Server with TypeScript.
+# GraphQL Wine Explorer - Learning Project
+ 
+A full-stack GraphQL learning project using React (Apollo Client) and Apollo Server with TypeScript, focused on exploring wine data.
 
 ## Project Plan
 
 ### **Project Structure Overview (Monorepo)**
 
 ```
-graphql-tvmaze/
+graphql-wine/
 ├── package.json         # Root package.json with workspaces
 ├── node_modules/        # Shared dependencies (hoisted)
 ├── client/              # React frontend (current Vite setup)
@@ -66,29 +66,28 @@ graphql-tvmaze/
 **1.2 Data Layer: Static JSON**
 - Create `server/src/data/` directory
 - Create JSON files for different entities:
-  - `shows.json` - Array of TV show objects
-  - `episodes.json` - Array of episode objects (with showId references)
-  - `cast.json` - Array of cast member objects (with showId references)
-  - `actors.json` - Array of actor objects (referenced by cast)
+  - `varietals.json` - Array of varietal objects
+  - `wineries.json` - Array of winery objects
+  - `wines.json` - Array of wine objects (with varietalId and wineryId references)
 - Structure data with proper relationships (using IDs for references)
 - Create a simple data access layer:
   - `dataAccess.ts` or `dataLoader.ts` with functions to:
     - Load JSON files
     - Filter/find by ID
-    - Filter by relationships (e.g., get episodes by showId)
+    - Filter by relationships (e.g., get wines by varietalId or wineryId)
     - Simple in-memory operations (no database queries needed)
 - Consider using `fs.readFileSync` or `import` statements to load JSON
-- Data can be manually curated or seeded from TVMaze API for initial setup
+- Data can be manually curated or seeded from a public wine dataset for initial setup
 
 **1.3 GraphQL Schema Design**
-- Define core types: `Show`, `Episode`, `Cast`, `Actor`
-- Design relationships (Show → Episodes, Show → Cast, etc.)
+- Define core types: `Varietal`, `Winery`, `Wine`
+- Design relationships (Varietal → Wines, Winery → Wines, etc.)
 - Start with queries (read operations)
 - Add mutations later (create/update/delete) - these will update in-memory data or JSON files
 - Consider pagination, filtering, sorting
 
 **1.4 Resolvers**
-- Implement query resolvers (e.g., `shows`, `show(id)`, `episodes`)
+- Implement query resolvers (e.g., `varietals`, `varietal(id)`, `wineries`, `wines`)
 - Handle relationships (nested resolvers that use data access functions)
 - Add basic error handling
 - For mutations: update in-memory data (or optionally write back to JSON files)
@@ -112,8 +111,7 @@ graphql-tvmaze/
 - Use `gql` template literals for type safety
 - Consider code generation (GraphQL Code Generator) for TypeScript types
 
-**2.3 React Integration**
-- Create custom hooks (e.g., `useShows`, `useShow(id)`)
+- Create custom hooks (e.g., `useVarietals`, `useVarietal(id)`, `useWineries`, `useWines`)
 - Use `useQuery` and `useMutation` hooks
 - Build components that consume GraphQL data
 - Handle loading, error, and success states
@@ -121,24 +119,21 @@ graphql-tvmaze/
 ### **Phase 3: Core Features (Incremental Learning)**
 
 **3.1 Basic Queries**
-- List all shows
-- Show details page
-- Episode listings
-- Cast information
+- List all varietals
+- Varietal details page showing associated wines
+- List all wineries
+- Wine details including varietal and winery info
 
-**3.2 Advanced Query Features**
-- Search/filter shows (implemented in resolvers using array methods)
+- Search/filter wines (by varietal, winery, price range, rating)
 - Pagination (cursor-based or offset-based using array slicing)
 - Sorting (using array sort methods)
 - Field selection (let GraphQL handle what fields to fetch)
 
-**3.3 Mutations** (if applicable)
-- Add favorite shows (update in-memory state or JSON)
-- Rate shows/episodes
-- Create watchlists
+- Save favorite wines (update in-memory state or JSON)
+- Rate wines
+- Create tasting lists
 - Note: With static JSON, mutations can update in-memory data during server runtime, or optionally write back to JSON files using `fs.writeFileSync`
 
-**3.4 Optimistic Updates & Cache Management**
 - Update Apollo cache after mutations
 - Optimistic UI updates
 - Cache invalidation strategies
@@ -146,7 +141,7 @@ graphql-tvmaze/
 ### **Phase 4: Advanced GraphQL Concepts**
 
 **4.1 Fragments**
-- Create reusable fragments for Show, Episode, etc.
+- Create reusable fragments for Varietal, Winery, Wine, etc.
 - Use fragments in queries to reduce duplication
 
 **4.2 Subscriptions** (optional, more advanced)
@@ -222,59 +217,46 @@ graphql-tvmaze/
 
 ### **Data Model Suggestion**
 
-For TV shows, consider this JSON structure:
+For wine data, consider this JSON structure:
 
-**shows.json**
+**varietals.json**
 ```json
 [
   {
     "id": "1",
-    "name": "Breaking Bad",
-    "summary": "A high school chemistry teacher...",
-    "image": "https://...",
-    "premiered": "2008-01-20",
-    "rating": 9.5,
-    "genres": ["Drama", "Crime", "Thriller"]
+    "name": "Cabernet Sauvignon",
+    "color": "Red",
+    "description": "Full-bodied red with notes of dark fruit and oak."
   }
 ]
 ```
 
-**episodes.json**
+**wineries.json**
 ```json
 [
   {
     "id": "1",
-    "showId": "1",
-    "name": "Pilot",
-    "season": 1,
-    "number": 1,
-    "airdate": "2008-01-20",
-    "summary": "Episode summary..."
+    "name": "Silver Oak Cellars",
+    "region": "Napa Valley",
+    "country": "USA",
+    "founded": 1972,
+    "description": "Known for Cabernet Sauvignon wines aged in American oak."
   }
 ]
 ```
 
-**cast.json**
+**wines.json**
 ```json
 [
   {
     "id": "1",
-    "showId": "1",
-    "actorId": "1",
-    "character": "Walter White",
-    "role": "Main"
-  }
-]
-```
-
-**actors.json**
-```json
-[
-  {
-    "id": "1",
-    "name": "Bryan Cranston",
-    "image": "https://...",
-    "birthday": "1956-03-07"
+    "name": "Silver Oak Napa Valley Cabernet Sauvignon 2018",
+    "varietalId": "1",
+    "wineryId": "1",
+    "vintage": 2018,
+    "abv": 14.2,
+    "price": 125,
+    "tastingNotes": "Blackberry, cassis, dark chocolate, and toasted oak."
   }
 ]
 ```
