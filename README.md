@@ -1,4 +1,4 @@
-# GraphQL Wine Explorer - Learning Project
+# VinQl - A GraphQL Wine Explorer & Learning Project
  
 A full-stack GraphQL learning project using React (Apollo Client) and Apollo Server with TypeScript, focused on exploring wine data.
 
